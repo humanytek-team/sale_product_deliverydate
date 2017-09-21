@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+      <record model="ir.ui.view" id="view_order_form_product_delivery_date">
+        <field name="name">view_order_form_product_delivery_date</field>
+        <field name="model">sale.order</field>
+        <field name="priority">20</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/tree/field[@name='name']" position="after">
+                <field name="product_delivery_date" />
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form/group/group/field[@name='product_id']" position="after">
+                <field name="product_delivery_date" />
+            </xpath>
+        </field>
+      </record>
+
+
+      <template id="report_saleorder_document_product_delivery_date" inherit_id="sale.report_saleorder_document">
+            <xpath expr="//t[@t-foreach='doc.order_lines_layouted()']/table/thead/tr/th" position="after">
+                <th class="text-right">Fecha de Entrega</th>
+            </xpath>
+
+            <xpath expr="//t[@t-foreach='doc.order_lines_layouted()']/table/tbody/t[1]/t[2]/tr/td[1]" position="after">
+                <td class="text-right"><span t-field="l.product_delivery_date"/></td>
+            </xpath>
+        </template>
+
+    </data>
+</openerp>
