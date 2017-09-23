@@ -8,39 +8,6 @@ class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
 
-    # @api.onchange('product_id')
-    # def _compute_delivery_date(self):
-    #     sale_delay = self.product_id.sale_delay
-    #     create_date = self.order_id.date_order
-    #     #create_date = self.order_id.confirmation_date
-    #     product_delivery_date = False
-    #     if create_date:
-    #         create_date = datetime.strptime(str(create_date),"%Y-%m-%d %H:%M:%S")
-    #         product_delivery_date = timedelta(days=(self.product_id.sale_delay+1)) + create_date
-    #         self.product_delivery_date = product_delivery_date
-    #     return
-
-    #SIRVE
-    # @api.depends('product_id','order_id.date_order')
-    # def _compute_delivery_date(self):
-    #     #print '2--------'
-    #     sale_delay = self.product_id.sale_delay
-    #     create_date = self.order_id.date_order
-    #     #create_date = self.order_id.confirmation_date
-    #     product_delivery_date = False
-    #     if create_date:
-    #         create_date = datetime.strptime(str(create_date),"%Y-%m-%d %H:%M:%S")
-    #         product_delivery_date = timedelta(days=(self.product_id.sale_delay+1)) + create_date
-    #         self.product_delivery_date = product_delivery_date
-    #     return
-
-
-
-    # user_tz = self.env.user.tz or pytz.utc
-    # local = pytz.timezone(user_tz)
-    # display_date_result = datetime.strftime(pytz.utc.localize(datetime.strptime(your_date_or_datetime_info,
-    # DEFAULT_SERVER_DATETIME_FORMAT)).astimezone(local),"%d/%m/%Y %H:%M%S") 
-
     def convert_tz(self, date):
         user_tz = self.env.user.tz or pytz.utc
         local = pytz.timezone(user_tz)
@@ -49,14 +16,18 @@ class SaleOrderLine(models.Model):
         return display_date_result
 
     @api.multi
-    @api.depends('product_id','order_id.date_order')
+    @api.onchange('product_id')
     def _compute_delivery_date(self):
-        
+        #print '_compute_delivery_date'
         for rec in self:
             #print '-----------'
             sale_delay = rec.product_id.sale_delay
-            create_date = rec.order_id.date_order
-            create_date = self.convert_tz(create_date)
+            #create_date = rec.order_id.date_order
+            create_date = self.order_id.date_order
+            #print 'self.order_id.create_date: ',self.order_id.create_date
+            #print 'self.order_id.name: ',self.order_id.name
+            if create_date:
+                create_date = self.convert_tz(create_date)
             #create_date = rec.order_id.confirmation_date
             product_delivery_date = False
             if create_date:
@@ -67,6 +38,24 @@ class SaleOrderLine(models.Model):
                 rec.product_delivery_date = product_delivery_date
         return
 
+    # @api.multi
+    # def _set_delivery_date(self):
+    #     print '_set_delivery_date'
+    #     for rec in self:
+    #         print 'product_delivery_date: ',rec.product_delivery_date
+            #rec.product_delivery_date = rec.product_delivery_date
+            # if not rec.product_delivery_date: continue
 
-    #product_delivery_date = fields.Date('Fecha de entrega')
-    product_delivery_date = fields.Date('Fecha de entrega',compute='_compute_delivery_date',store=True)
+            # create_date = rec.order_id.date_order
+            # create_date = self.convert_tz(create_date)
+
+            # if create_date:
+            #     create_date = datetime.strptime(str(create_date),"%Y-%m-%d %H:%M:%S")
+            #     product_delivery_date = create_date - timedelta(days=(rec.product_id.sale_delay+1))
+            #     #rec.product_delivery_date = product_delivery_date
+            #     rec.write({'product_delivery_date':product_delivery_date})
+
+
+    product_delivery_date = fields.Date('Fecha de entrega')
+    #line_date_order = fields.Datetime('Fecha de orden', related='order_id.date_order')
+    #product_delivery_date = fields.Date('Fecha de entrega',compute='_compute_delivery_date',inverse='_set_delivery_date',store=True)
